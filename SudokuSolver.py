@@ -61,3 +61,25 @@ def possible_number(sudoku, number, position):
                 return False
     return True
 
+def solve_sudoku(sudoku):
+    """
+    Solves sudoku by using backtracking
+    :param sudoku: Input of a numpy 9x9 array with integers 0-9
+    :return: if sudoku is solved, it returns true and the sudoku is updated and ready to be printed.
+             Else it returns false to go to the previous cel
+    """
+    if not empty_cell(sudoku):
+        return True
+    else:
+        column, row = empty_cell(sudoku)
+
+    for num in range(1,10):
+        if possible_number(sudoku, num, (column,row)):
+            sudoku[row][column] = num
+            if solve_sudoku(sudoku):
+                return True
+
+            sudoku[row][column] = 0
+    return False
+
+solve_sudoku(EvilSudoku)
