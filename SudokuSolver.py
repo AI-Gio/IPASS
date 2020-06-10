@@ -1,4 +1,6 @@
 import numpy as np
+import time
+start_time = time.time()
 EvilSudoku = [[0, 0, 0, 6, 0, 7, 1, 0, 3],
               [0, 2, 0, 0, 0, 0, 0, 0, 0],
               [0, 0, 0, 1, 0, 0, 0, 0, 0],
@@ -31,7 +33,7 @@ def empty_cell(sudoku):
                 return (x,y)
     return False
 
-def possible_number(sudoku, number, position):
+def valid_number(sudoku, number, position):
     """
     Searches through a sudoku if a number that is inserted is valid by looking at row, column and box
     :param sudoku: Input of a numpy 9x9 array with integers 0-9
@@ -66,7 +68,7 @@ def solve_sudoku(sudoku):
     Solves sudoku by using backtracking
     :param sudoku: Input of a numpy 9x9 array with integers 0-9
     :return: if sudoku is solved, it returns true and the sudoku is updated and ready to be printed.
-             Else it returns false to go to the previous cel
+             Else it returns false to go to the previous cell
     """
     if not empty_cell(sudoku):
         return True
@@ -74,12 +76,43 @@ def solve_sudoku(sudoku):
         column, row = empty_cell(sudoku)
 
     for num in range(1,10):
-        if possible_number(sudoku, num, (column,row)):
+        if valid_number(sudoku, num, (column,row)):
             sudoku[row][column] = num
             if solve_sudoku(sudoku):
                 return True
-
             sudoku[row][column] = 0
     return False
 
-solve_sudoku(EvilSudoku)
+def smallest_str(dictionary):
+    """
+    Calculates the smallest string
+    :param dictionary: A dictionary with key = (x,y) and value = a string
+    :return: The coordinates of the cell with the least amount of possibilities
+    """
+    min_str_length = 10
+    min_co = None
+    for co, s in dictionary.items():
+        if len(s) < min_str_length:
+            min_str_length = len(s)
+            min_co = co
+    return min_co
+
+def cell_possibilities(sudoku):
+    """
+    Generates dictionary with all of the coordinates of the cells with its possible numbers
+    :param sudoku: Input of a numpy 9x9 array with integers 0-9
+    :return: Dictionary with key = (x,y) and value = string with possible numbers
+    """
+    possib_val= {}
+    for y in range(len(sudoku)):
+        for x in range(len(sudoku)):
+            valid = ""
+            if sudoku[y][x] == 0:
+                for i in range(1,10):
+                    if valid_number(sudoku, i, (x,y)):
+                        valid += f"{i}"
+                possib_val[(x,y)] = valid
+    return possib_val
+
+
+print("--- %s seconds ---" % (time.time() - start_time))
