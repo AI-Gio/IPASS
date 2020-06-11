@@ -1,6 +1,8 @@
+import csv
 import numpy as np
 import time
 start_time = time.time()
+
 EvilSudoku = [[0, 0, 0, 6, 0, 7, 1, 0, 3],
               [0, 2, 0, 0, 0, 0, 0, 0, 0],
               [0, 0, 0, 1, 0, 0, 0, 0, 0],
@@ -63,25 +65,7 @@ def valid_number(sudoku, number, position):
                 return False
     return True
 
-def solve_sudoku(sudoku):
-    """
-    Solves sudoku by using backtracking
-    :param sudoku: Input of a numpy 9x9 array with integers 0-9
-    :return: if sudoku is solved, it returns true and the sudoku is updated and ready to be printed.
-             Else it returns false to go to the previous cell
-    """
-    if not empty_cell(sudoku):
-        return True
-    else:
-        column, row = empty_cell(sudoku)
 
-    for num in range(1,10):
-        if valid_number(sudoku, num, (column,row)):
-            sudoku[row][column] = num
-            if solve_sudoku(sudoku):
-                return True
-            sudoku[row][column] = 0
-    return False
 
 def smallest_str(dictionary):
     """
@@ -104,15 +88,99 @@ def cell_possibilities(sudoku):
     :return: Dictionary with key = (x,y) and value = string with possible numbers
     """
     possib_val= {}
+    # loop through sudoku
     for y in range(len(sudoku)):
         for x in range(len(sudoku)):
             valid = ""
             if sudoku[y][x] == 0:
+                # if a cell is equal to 0, see what numbers are valid in that cell
                 for i in range(1,10):
                     if valid_number(sudoku, i, (x,y)):
                         valid += f"{i}"
+
+                # when all of the valid cells are established, add them to the dictionary
                 possib_val[(x,y)] = valid
     return possib_val
 
+def solve_sudoku(sudoku):
+    """
+    Solves sudoku by using backtracking
+    :param sudoku: Input of a numpy 9x9 array with integers 0-9
+    :return: if sudoku is solved, it returns true and the sudoku is updated and ready to be printed.
+             Else it returns false to go to the previous cell
+    """
+    if not empty_cell(sudoku):
+        return True
+    else:
+        column, row = smallest_str(cell_possibilities(sudoku))
+
+    for num in range(1,10):
+        if valid_number(sudoku, num, (column,row)):
+            sudoku[row][column] = num
+            if solve_sudoku(sudoku):
+                return True
+            sudoku[row][column] = 0
+    return False
+
+"..__== Speed check algorithm ==__.."
+
+def dots2zero():
+    """
+    Reads from a csv file with 81 char long strings, but there are dots on the places where there should be 0
+    So write to another csv file with zeros instead of dots
+    """
+    with open('sudoHardDot.csv','r') as f:
+        reader = csv.reader(f)
+        with open('sudoHard.csv','w', newline='') as F:
+            writer = csv.writer(F)
+            for row in reader:
+                x = row[0].replace('.','0')
+                writer.writerow([x])
+
+def str2array(sudo_str):
+    """
+    Converts sudoku string into an numpy array
+    :param sudo_str: input of a 81 long string with only numbers
+    :return: numpy 9x9 array with integers 0-9
+    """
+    s = sudo_str
+    sudoku = []
+    for i in range(9):
+        sudoku.append(list(map(int,s[:9])))
+        s = s[9:]
+    return sudoku
+
+def array2str(sudo_array):
+    """
+    Converts a numpy 9x9 array into a string
+    :param sudo_array: Input of a numpy 9x9 array with integers 0-9
+    :return: A 81 char long string only with numbers
+    """
+    sudo_str = ''
+    for row in sudo_array:
+        for digit in row:
+            sudo_str += str(digit)
+    return sudo_str
+
+def alg_checker(amount, sudo_file):
+    """
+    Calculate the average time that the algorithm takes with an amount of sudoku's
+    :param amount: Decide how many sudoku's u want to give to the algoritm
+    :param sudo_file: CSV file with 81 char long strings
+    :return: The average time of the algorithm
+    """
+    with open(f'{sudo_file}') as f:
+        reader = csv.reader(f)
+        for x,row in enumerate(reader):
+            if x == 0:
+                continue
+            if x == amount + 1:
+                break
+            array = str2array(row[0])
+            solve_sudoku(array)
+
+alg_checker(2, 'sudoku.csv')
+
+# solve_sudoku(EvilSudoku2)
 
 print("--- %s seconds ---" % (time.time() - start_time))
