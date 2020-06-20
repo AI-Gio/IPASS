@@ -1,6 +1,7 @@
 import csv
 import numpy as np
 import time
+from tkinter import *
 start_time = time.time()
 
 EvilSudoku = [[0, 0, 0, 6, 0, 7, 1, 0, 3],
@@ -22,6 +23,8 @@ EvilSudoku2 = [[0, 9, 0, 0, 0, 0, 2, 0, 0],
                [0, 3, 0, 7, 0, 0, 0, 0, 0],
                [6, 0, 0, 0, 0, 0, 0, 5, 0],
                [0, 0, 0, 9, 0, 0, 0, 0, 0]]
+
+wtf_sudo = [[0, 0, 0, 0, 0, 0, 0, 2, 3], [6, 0, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 4, 0, 0, 0, 0, 0], [0, 0, 0, 0, 8, 0, 7, 0, 0], [5, 0, 2, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 1, 0, 0], [0, 8, 0, 2, 0, 3, 0, 0, 0], [0, 1, 0, 0, 0, 0, 6, 4, 0], [0, 0, 0, 5, 0, 0, 0, 0, 0]]
 
 def empty_cell(sudoku):
     """
@@ -104,7 +107,7 @@ def cell_possibilities(sudoku):
 
 def solve_sudoku(sudoku):
     """
-    Solves sudoku by using backtracking
+    Solves sudoku by using backtracking and Minimum remaining value heuristic
     :param sudoku: Input of a numpy 9x9 array with integers 0-9
     :return: if sudoku is solved, it returns true and the sudoku is updated and ready to be printed.
              Else it returns false to go to the previous cell
@@ -169,18 +172,25 @@ def alg_checker(amount, sudo_file):
     :param sudo_file: CSV file with 81 char long strings
     :return: The average time of the algorithm
     """
+    times = []
     with open(f'{sudo_file}') as f:
         reader = csv.reader(f)
         for x,row in enumerate(reader):
+            start = time.time()
             if x == 0:
                 continue
             if x == amount + 1:
                 break
             array = str2array(row[0])
             solve_sudoku(array)
+            times.append(time.time() - start)
+    print(sum(times)/len(times))
+    print(f"Max time: {max(times)},  Min time: {min(times)}")
 
 alg_checker(2, 'sudoku.csv')
 
+
+"..__== Run Section ==__.."
 # solve_sudoku(EvilSudoku2)
 
 print("--- %s seconds ---" % (time.time() - start_time))
